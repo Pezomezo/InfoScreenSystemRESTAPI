@@ -1,0 +1,17 @@
+{
+  "name": "info-screen-api",
+  "version": "1.0.0",
+  "description": "API to connect azure sql with angular admin-tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adam Janos Horvath",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express4-tedious": "^0.3.0",
+    "morgan": "^1.9.1",
+    "tedious": "^6.6.2"
+  }
+}
