@@ -1,13 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const { poolpromise } = require('../Database/DatabaseSingleton')
 
 //GET
 router.get('/',async (req, res, next) => {
     try {
+        console.log('inside the route')
         // make sure that any items are correctly URL encoded in the connection string
-        console.log('Inside the InfoScreenROutew')
-        req.sql('select * from InfoScreenPC for json path').into(res);
-        
+        const pool = await poolpromise
+        const result = await pool.request().query("select * from InfoSceenPC")
+        res.status(200).json({
+            response: result.recordset
+        })
+        console.dir(result)
     } catch (err) {
         console.log('Error happened: ' + err);
     }
@@ -16,42 +21,43 @@ router.get('/',async (req, res, next) => {
 //POST
  router.post('/', async (req, res, err) => {
     try {
-        //var newID = null;
+        var newID = null;
         //Automatic ID creation
         //Getting last ID in table
-        //const LastID = null;
-        //req.sql('SELECT TOP 1 ID FROM InfoScreenPC ORDER BY ID DESC for json path;').into(res)
-        //console.log('LAST ID: ' + LastID)
+        const pool = await poolpromise
+        const LastID = await pool.request().query('SELECT TOP 1 ID FROM InfoSceenPC ORDER BY InfoScreenID DESC');
+        console.log('LAST ID: ' + LastID)
         //Checking wether data came back or not
         //If mp data came back that mean the table is empty so the new ID will be 1
-        //if(LastID.recordset[0]){
-        //    newID = parseInt(LastID.recordset[0].ID +1)
-        //    console.log(newID)
-        //}
-        //else{
-        //    newID = 1
-        //    console.log(newID)
-        //}
+        if(LastID.recordset[0]){
+            newID = parseInt(LastID.recordset[0].ID +1)
+            console.log(newID)
+        }
+        else{
+            newID = 1
+            console.log(newID)
+        }
         
-        req.sql("INSERT INTO InfoScreenPC VALUES ('" + req.body.ID + "', '" + req.body.Name + "', '" + req.body.Power_State + "');").exec(res);
-
-        //const result = await pool.request().query("INSERT INTO InfoScreenPC VALUES ('" + newID + "', '" + req.body.Name + "', '" + req.body.Power_State + "');")
+        const result = await pool.request().query("INSERT INTO InfoSceenPC VALUES ('" + newID + "', '" + req.body.Name + "', '" + req.body.Power_State + "');")
         
+        res.status(200).json({
+            message: result
+        })
     }catch (err) {
         console.log('Error happened: ' + err);
     }
 });
-/*
+
 //UPDATE
 router.patch('/:screenID', async (req, res, err) => {
     try {
         const pc_ID = req.params.screenID;
         let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from InfoScreenPC')
+        const getResult = await pool.request().query('select * from InfoSceenPC')
         if (getResult.recordset[0]) {
-            const result = await pool.request().query("UPDATE InfoScreenPC SET Name ='" + req.body.Name + 
-                                                     "', Power_State = '" + req.body.Power_State +
-                                                      "' WHERE ID ='" + pc_ID + "' ;")
+            const result = await pool.request().query("UPDATE InfoSceenPC SET InfoScreenName ='" + req.body.Name + 
+                                                     "', InfoScreenPower_State = '" + req.body.Power_State +
+                                                      "' WHERE InfoScreenID ='" + pc_ID + "' ;")
             res.status(200).json({
                 response: result
             })
@@ -71,9 +77,9 @@ router.delete('/:screenID', async (req, res, err) => {
     try {
         var id = req.params.screenID;
         let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from InfoScreenPC')
+        const getResult = await pool.request().query('select * from InfoSceenPC')
         if (getResult.recordset[0]) {
-            const result = await pool.request().query("DELETE FROM InfoScreenPC WHERE ID='" + id + "';")
+            const result = await pool.request().query("DELETE FROM InfoSceenPC WHERE InfoScreenID='" + id + "';")
         
             res.status(200).json({
                 response: result
@@ -89,5 +95,5 @@ router.delete('/:screenID', async (req, res, err) => {
     }
     
 })
- */
+
 module.exports = router;
