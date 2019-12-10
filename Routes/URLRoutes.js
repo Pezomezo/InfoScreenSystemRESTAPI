@@ -2,12 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
 
+
+const sqlJoin = `Select U.URL_ID, U.Url_Name, U.URL, P.PresentationID, P.Repetition, P.Time_Frame, P.Date, M.MagicID, M.MagicWidht, M.MagicHeight From URL_Table U
+Join PresentationSettings P ON P.PresentationID = U.PresentationID
+Join MagicSettings M ON M.MagicID = U.MagicID `;
+
 //GET
 router.get('/',async (req, res, next) => {
     try {
         // make sure that any items are correctly URL encoded in the connection string
         const pool = await poolpromise
-        const result = await pool.request().query('select * from URL_Table;')
+        const result = await pool.request().query(sqlJoin)
+        res.status(200).json({
+            response: result.recordsets[0]
+        })
+        console.dir(result)
+    } catch (err) {
+        console.log('Error happened: ' + err);
+    }
+});
+
+//GET by ID
+router.get('/:urlID',async (req, res, next) => {
+    try {
+        const URL_ID = req.params.urlID;
+        // make sure that any items are correctly URL encoded in the connection string
+        const pool = await poolpromise
+        const result = await pool.request().query(sqlJoin + ' WHERE U.URL_ID = ' + URL_ID)
         res.status(200).json({
             response: result.recordsets[0]
         })
