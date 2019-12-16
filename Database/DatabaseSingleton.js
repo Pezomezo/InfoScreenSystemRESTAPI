@@ -1,8 +1,8 @@
 const sql = require('mssql');
 
 var config = {
-        server: "info-screen-server.database.windows.net",
-        database: "infoScrennDB",
+        server: "infoscreendb.database.windows.net",
+        database: "InfoScreenDB",
         // If you're on Windows Azure, you will need this:
         options: {encrypt: true},
         authentication: {
