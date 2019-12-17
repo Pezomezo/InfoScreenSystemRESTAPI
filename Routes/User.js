@@ -6,62 +6,96 @@ const jwt = require('jsonwebtoken')
 
 
 router.post('/signup', async (req, res, err) => {
-    
-
-    const pool = await poolpromise;
-    userCheck = pool.request().query('select * from User where Email = ' + req.body.email);
-    if (userCheck){
+    try {
+        console.log('before the poolpromise');
+        const pool = await poolpromise
+        console.log('after the pool promise');
+        const userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.email + "'");
+        console.log(userCheck.recordsets[0].length );
+        if (userCheck.recordsets[0].length !== 0){
+            console.log(userCheck);
+            res.status(400).json({
+                message: 'user already exists'
+            })
+        }else {
+            console.log('inside the else block')
+            bcrypt.hash(req.body.password,10, async (err, hash) => {
+                if (err) {
+                    res.status(500).json({
+                        error: err
+                    })
+                } else {
+                    try {
+                        console.log(hash);
+                        const result = await pool.request().query("INSERT INTO TblUser VALUES ('" +  req.body.email + "', '" + hash + "');");
+                        res.status(200).json({
+                            message: "User signed up!",
+                            result: result
+                        })
+                    } catch (error) {
+                        res.status(500).json({
+                            message: 'user sign up failed',
+                            err: error
+                        })
+                    }
+                    
+                }
+            
+            })
+        }
+    } catch (err) {
         res.status(400).json({
-            message: 'user already exists'
+            message: 'something went wrong',
+            error: err
         })
-    }else {
-        bcrypt.hash(req.body.password,10, (err, hash) => {
-            if (err) {
-                res.status(500).json({
-                    error: err
-                })
-            } else {
-                const result = pool.request().query("INSERT INTO USER VALUES ('" +  req.body.email + "', '" + hash + "';");
-                res.status(200).json({
-                    message: "User signed up!"
-                })
-            }
-        
-    })
-        
     }
+    
 });
 
 router.post('/login', async (req, res, err) => {
-    const pool = await poolpromise;
-    userCheck = pool.request().query('select * from User where Email = ' + req.body.email);
-    if (userCheck){
-        bcrypt.compare(req.body.password, userCheck.recordsets[0].password, (err, result) => {
-            if (err) {
-                res.status(401).json({
-                message: 'Auth failed'
-                });
-            } 
-            if (result) {
-                const token = jwt.sign({
-                    email: userCheck.recordsets[0].email,
-                    userID: userCheck.recordsets[0].userID
-                }, 'secret', { expiresIn: '1h'} )
-                res.status(200).json({
-                    message: 'Auth successful',
-                    token: token
-                });
-            }
-            res.status(401).json({
-                message: 'Auth failed'
-                });
-        })
-    }else {
-        res.status(400).json({
-            message: 'Email or password invalid'
-        })
-    }
+    try {
+        const pool = await poolpromise;
+        userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.email + "';");
+        console.log(userCheck.recordsets[0][0].UserPassword);
+        console.log(req.body.password)
+        if (userCheck.recordsets[0].length !== 0){
+            bcrypt.compare(req.body.password, userCheck.recordsets[0][0].UserPassword, (err, result) => {
+                console.log('inside compare');
+                if (err) {
+                    console.log('Error happened')
+                    res.status(401).json({
+                    message: 'Auth failed',
+                    error: err
+                    });
+                } 
+                if (result) {
+                    console.log('creating the token')
+                    const token = jwt.sign({
+                        email: userCheck.recordsets[0].Email,
+                        userID: userCheck.recordsets[0].UserID
+                    }, 'secret', { expiresIn: '1h'} )
 
+                    res.status(200).json({
+                        message: 'Auth successful',
+                        token: token
+                    });
+                }
+                res.status(401).json({
+                    message: 'Auth failed',
+                    error: err
+                    });
+            })
+        }else {
+            res.status(400).json({
+                message: 'Email or password invalid'
+            });
+        }
+    } catch (error) {
+        console.log('Inside catch')
+        res.status(500).json({
+            message: 'Auth failed'
+        });
+    }
 })
 
 module.exports = router;
