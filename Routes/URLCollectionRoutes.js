@@ -4,12 +4,12 @@ const { poolpromise } = require('../Database/DatabaseSingleton')
 
 
 
-const selectStatement = `SELECT C.ID, G.GroupID, G.GroupName, I.InfoScreenID, I.InfoScreenName, I.InfoScreenPower_State,
-U.Url_ID, U.Url_Name, U.URL, M.MagicID, M.MagicHeight, M.MagicWidht, P.PresentationID, P.Repetition,
-P.Time_Frame, P.Date FROM URL_Table U 
-join URLCollections C ON U.Url_ID = C.URL_ID
-Join InfoSceenPC I ON I.InfoScreenID = C.Info_Screen_ID
-JOIN Groups G ON G.GroupID = C.groupID
+const selectStatement = `SELECT C.CollectionID, G.GroupID, G.GroupName, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState,
+U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition,
+P.TimeFrame, P.StartDate FROM URL_Table U 
+join URLCollections C ON U.UrlID = C.URLID
+Join InfoScreenPC I ON I.InfoScreenPCID = C.InfoScreenID
+JOIN Groups G ON G.GroupID = C.GroupID
 Join MagicSettings M ON M.MagicID = U.MagicID
 Join PresentationSettings P ON P.PresentationID = U.PresentationID `
 
@@ -19,11 +19,12 @@ router.get('/all',async (req, res, next) => {
         // make sure that any items are correctly URL encoded in the connection string
         const pool = await poolpromise
         const result = await pool.request().query(selectStatement + 'ORDER BY G.GroupID ASC')
-        
+        console.log(result)
         res.status(200).json({
             response: result.recordsets[0]
         });
     } catch (err) {
+        console.log('we in here');
         res.status(400).json({
             error: err
         });

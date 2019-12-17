@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 
 
-router.post('/signup', (req, res, err) => {
+router.post('/signup', async (req, res, err) => {
     
 
     const pool = await poolpromise;
@@ -21,7 +21,7 @@ router.post('/signup', (req, res, err) => {
                     error: err
                 })
             } else {
-                const result = await pool.request().query("INSERT INTO USER VALUES ('" +  req.body.email + "', '" + hash + "';");
+                const result = pool.request().query("INSERT INTO USER VALUES ('" +  req.body.email + "', '" + hash + "';");
                 res.status(200).json({
                     message: "User signed up!"
                 })
@@ -32,7 +32,7 @@ router.post('/signup', (req, res, err) => {
     }
 });
 
-router.post('/login', (req, res, err) => {
+router.post('/login', async (req, res, err) => {
     const pool = await poolpromise;
     userCheck = pool.request().query('select * from User where Email = ' + req.body.email);
     if (userCheck){

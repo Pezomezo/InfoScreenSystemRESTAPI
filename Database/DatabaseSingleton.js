@@ -1,18 +1,20 @@
-const sql = require('mssql');
-
+const sql = require('mssql/msnodesqlv8');
 var config = {
-        server: "infoscreendb.database.windows.net",
+        server: `DESKTOP-JQ5PF54\\ADAMKASERVER`,
         database: "InfoScreenDB",
         // If you're on Windows Azure, you will need this:
-        options: {encrypt: true},
-        authentication: {
-          type: "default",
-          options: {  
-            userName: "Adamka",
-            password: "HorvathAdam98",
-          }
+        driver: "msnodesqlv8",
+        options: {
+          trustedConnection: true
         }
 };
+
+//const config = {
+//  user: 'sa',
+//  password: 'HorvathAdam98',
+//  server: 'DESKTOP-JQ5PF54\\ADAMKASERVER', // You can use 'localhost\\instance' to connect to named instance
+//  database: 'InfoScreenDB',
+//}
 const poolpromise = new sql.ConnectionPool(config)
 .connect()
 .then(pool => {

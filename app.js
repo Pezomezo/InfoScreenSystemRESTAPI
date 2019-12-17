@@ -9,6 +9,7 @@ const MagicRoutes = require('./Routes/MagicSettings')
 const PresentationRoutes = require('./Routes/PresentationSettingsRoutes')
 const URLCollectionRoutes = require('./Routes/URLCollectionRoutes')
 const URLRoutes = require('./Routes/URLRoutes')
+const User = require('./Routes/User');
 
 // server  : "infoscreendb.database.windows.net",
 //             username: 'Adamka',
@@ -57,6 +58,7 @@ app.use('/api/magic', MagicRoutes);
 app.use('/api/settings', PresentationRoutes);
 app.use('/api/collection', URLCollectionRoutes);
 app.use('/api/presentation', URLRoutes);
+app.use('/api/user', User);
 
 //ERROR HANDLING
 app.use((req, res, next) => {
