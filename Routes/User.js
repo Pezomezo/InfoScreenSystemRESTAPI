@@ -10,7 +10,7 @@ router.post('/signup', async (req, res, err) => {
         console.log('before the poolpromise');
         const pool = await poolpromise
         console.log('after the pool promise');
-        const userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.email + "'");
+        const userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.username + "'");
         console.log(userCheck.recordsets[0].length );
         if (userCheck.recordsets[0].length !== 0){
             console.log(userCheck);
@@ -27,7 +27,7 @@ router.post('/signup', async (req, res, err) => {
                 } else {
                     try {
                         console.log(hash);
-                        const result = await pool.request().query("INSERT INTO TblUser VALUES ('" +  req.body.email + "', '" + hash + "');");
+                        const result = await pool.request().query("INSERT INTO TblUser VALUES ('" +  req.body.username + "', '" + hash + "');");
                         res.status(200).json({
                             message: "User signed up!",
                             result: result
@@ -54,8 +54,11 @@ router.post('/signup', async (req, res, err) => {
 
 router.post('/login', async (req, res, err) => {
     try {
+        console.log(req.body.username);
+        console.log(req.body.password);
         const pool = await poolpromise;
-        userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.email + "';");
+        userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.username + "';");
+        console.log(userCheck.recordsets[0][0].Email);
         console.log(userCheck.recordsets[0][0].UserPassword);
         console.log(req.body.password)
         if (userCheck.recordsets[0].length !== 0){
@@ -63,25 +66,25 @@ router.post('/login', async (req, res, err) => {
                 console.log('inside compare');
                 if (err) {
                     console.log('Error happened')
-                    res.status(401).json({
+                    return res.status(401).json({
                     message: 'Auth failed',
                     error: err
                     });
                 } 
                 if (result) {
-                    console.log('creating the token')
-                    const token = jwt.sign({
+                    console.log('creating the token: ' + result);
+                    const token = jwt.sign({ 
                         email: userCheck.recordsets[0].Email,
                         userID: userCheck.recordsets[0].UserID
-                    }, 'secret', { expiresIn: '1h'} )
-
-                    res.status(200).json({
-                        message: 'Auth successful',
+                    }, 'secret', { expiresIn: '1h'} );
+                    console.log('token: ' + token);
+                    return res.status(200).json({
+                        message: 'Authentication successful',
                         token: token
                     });
                 }
                 res.status(401).json({
-                    message: 'Auth failed',
+                    message: 'Auth failed ittne',
                     error: err
                     });
             })

@@ -13,12 +13,38 @@ JOIN Groups G ON G.GroupID = C.GroupID
 Join MagicSettings M ON M.MagicID = U.MagicID
 Join PresentationSettings P ON P.PresentationID = U.PresentationID `
 
+const individualScreensStatement = `SELECT C.CollectionID, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState,
+U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition,
+P.TimeFrame, P.StartDate FROM URL_Table U 
+join URLCollections C ON U.UrlID = C.URLID
+Join InfoScreenPC I ON I.InfoScreenPCID = C.InfoScreenID
+Join MagicSettings M ON M.MagicID = U.MagicID
+Join PresentationSettings P ON P.PresentationID = U.PresentationID WHERE  C.GroupID IS NULL `
+
 //GET all collections and all data associated with them
 router.get('/all',async (req, res, next) => {
     try {
         // make sure that any items are correctly URL encoded in the connection string
         const pool = await poolpromise
         const result = await pool.request().query(selectStatement + 'ORDER BY G.GroupID ASC')
+        console.log(result)
+        res.status(200).json({
+            response: result.recordsets[0]
+        });
+    } catch (err) {
+        console.log('we in here');
+        res.status(400).json({
+            error: err
+        });
+    }
+});
+
+//GET all non-group collections and all data associated with them
+router.get('/individual',async (req, res, next) => {
+    try {
+        // make sure that any items are correctly URL encoded in the connection string
+        const pool = await poolpromise
+        const result = await pool.request().query(individualScreensStatement)
         console.log(result)
         res.status(200).json({
             response: result.recordsets[0]

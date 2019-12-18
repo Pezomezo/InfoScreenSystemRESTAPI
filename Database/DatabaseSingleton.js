@@ -1,6 +1,6 @@
 const sql = require('mssql/msnodesqlv8');
 var config = {
-        server: `DESKTOP-JQ5PF54\\ADAMKASERVER`,
+        server: `PC0175557`,
         database: "InfoScreenDB",
         // If you're on Windows Azure, you will need this:
         driver: "msnodesqlv8",
