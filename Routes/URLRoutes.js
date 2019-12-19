@@ -41,27 +41,44 @@ router.get('/:urlID',async (req, res, next) => {
 //POST
 router.post('/', async (req, res, err) => {
     try {
-        var newID = null;
+        var presentationID = null;
+        var magicID = null;
         let pool = await poolpromise;
-        //Automatic ID creation
-        //Getting last ID in table
-        const LastID = await pool.request().query('SELECT TOP 1 ID FROM URL_Table ORDER BY Url_ID DESC;  ')
-        //Checking wether data came back or not
-        //If mp data came back that mean the table is empty so the new ID will be 1
-        if(LastID.recordset[0]){
-            newID = parseInt(LastID.recordset[0].ID +1)
+        /* try {
+            const result = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.TimeFrame + 
+                                                                                                "', '" + req.body.StartDate +
+                                                                                                "', '" + req.body.Repetition + "');");
+        } catch (error) {
+            res.status(500).json({
+                message: 'saving presentationsettings failed',
+                err: error
+            });
         }
-        else{
-            newID = 1
-        }
+        try {
+            const result = await pool.request().query("INSERT INTO MagicSettings VALUES ('" + req.body.MagicWidht +
+                                                                                         "', '" + req.body.MagicHeight + "');");
+        } catch (error) {
+            res.status(500).json({
+                message: 'saving magic settings failed',
+                err: error
+            });
+        } */
         try{
-            const result = await pool.request().query("INSERT INTO URL_Table VALUES ('" + newID + "', '" + req.body.Name + "', '" + req.body.URL + "', '" 
-                                                                                        + req.body.presentationID + "', '" + req.body.magicID + "');")
+            console.log('Inside URL saving tryCatch')
+            const getPresentatioNID = await pool.Request().query('SELECT TOP 1 PresentationID FROM PresentationSettings ORDER BY PresentationID DESC ');
+            presentationID = getPresentatioNID;
+            console.log('ResultID: ' + getPresentatioNID + ' - Presentation: ' + presentationID);
+            const getMagicID = await pool.request().query("SELECT TOP 1 * FROM MagicSettings ORDER BY MagicID DESC;");
+            magicID = getMagicID.recordsets[0].MagicID;
+            console.log('PresentationID ' + presentationID + ' - Magic: ' + magicID);
+            const result = await pool.request().query("INSERT INTO URL_Table VALUES ('" + req.body.UrlName + "', '" + req.body.URL + "', '" 
+                                                                                        + presentationID + "', '" + magicID + "');")
             res.status(200).json({
                 response: result
             })
         }catch (err){
             res.status(400).json({
+                message: 'saving url failed',
                 error: err
             })
         }
