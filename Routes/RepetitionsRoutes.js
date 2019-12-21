@@ -7,7 +7,7 @@ router.get('/',async (req, res, next) => {
     try {
         // make sure that any items are correctly URL encoded in the connection string
         const pool = await poolpromise
-        const result = await pool.request().query('select * from MagicSettings')
+        const result = await pool.request().query('select * from Repetition')
         res.status(200).json({
             response: result.recordsets[0]
         })
@@ -18,12 +18,12 @@ router.get('/',async (req, res, next) => {
 });
 
 //GET by ID
-router.get('/:magicID',async (req, res, next) => {
+router.get('/:repetitionID',async (req, res, next) => {
     try {
-        const magicID = req.params.magicID;
+        const repetitionID = req.params.repetitionID;
         // make sure that any items are correctly URL encoded in the connection string
         const pool = await poolpromise
-        const result = await pool.request().query('select * from MagicSettings WHERE MagicID = ' + magicID)
+        const result = await pool.request().query('select * from Repetition WHERE ID = ' + repetitionID)
         res.status(200).json({
             response: result.recordsets[0]
         })
@@ -38,8 +38,18 @@ router.post('/', async (req, res, err) => {
     try {
         var newID = null
         let pool = await poolpromise;
-        const result = await pool.request().query("INSERT INTO MagicSettings VALUES ('" + req.body.width + 
-                                                    "', '" + req.body.heigth + "');")
+        //Automatic ID creation
+        //Getting last ID in table
+        const LastID = await pool.request().query('SELECT TOP 1 ID FROM Repetition ORDER BY ID DESC;  ')
+        //Checking wether data came back or not
+        //If mp data came back that mean the table is empty so the new ID will be 1
+        if(LastID.recordset[0]){
+            newID = parseInt(LastID.recordset[0].ID +1)
+        }
+        else{
+            newID = 1
+        }
+        const result = await pool.request().query("INSERT INTO Repetition VALUES ('" + req.body.RepetitionName + "');")
         res.status(200).json({
             response: result
         })
@@ -49,21 +59,19 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:magicID', async (req, res, err) => {
+router.patch('/:repetitionID', async (req, res, err) => {
     try {
-        const magicID = req.params.magicID;
+        const repetitionID = req.params.repetitionID;
         let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from MagicSettings WHERE ID = ' + magicID)
+        const getResult = await pool.request().query('select * from Repetition WHERE ID = ' + repetitionID)
         if (getResult.recordset[0]) {
-            const result = await pool.request().query("UPDATE MagicSettings SET MagicWidth ='" + req.body.width + 
-                                                     "', MagicHeigth = '" + req.body.heigth +
-                                                      "' WHERE MagicID ='" + magicID + "' ;")
+            const result = await pool.request().query("UPDATE Repetition SET RepetitionName ='" + req.body.RepetitionName + "' ;")
             res.status(200).json({
                 response: result
             })
         } else {
             res.status(404).json({
-                response: "There is no data associated with this ID: " + magicID
+                response: "There is no data associated with this ID: " + repetitionID
             })
         }
         
@@ -75,20 +83,20 @@ router.patch('/:magicID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:magicID', async (req, res, err) => {
+router.delete('/:repetitionID', async (req, res, err) => {
     try {
-        var magicID = req.params.magicID;
+        var repetitionID = req.params.repetitionID;
         let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from MagicSettings WHERE MagicID = ' + magicID)
+        const getResult = await pool.request().query('select * from Repetition WHERE ID = ' + repetitionID)
         if (getResult.recordset[0]) {
-            const result = await pool.request().query("DELETE FROM MagicSettings WHERE MagicID='" + magicID + "';")
+            const result = await pool.request().query("DELETE FROM Repetition WHERE ID='" + repetitionID + "';")
         
             res.status(200).json({
                 response: result
             })
         }else{
             res.status(404).json({
-                response: "There is no data associated with this ID: " + magicID
+                response: "There is no data associated with this ID: " + repetitionID
             })
         }
         

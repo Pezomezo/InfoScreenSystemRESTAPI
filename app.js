@@ -10,6 +10,8 @@ const PresentationRoutes = require('./Routes/PresentationSettingsRoutes')
 const URLCollectionRoutes = require('./Routes/URLCollectionRoutes')
 const URLRoutes = require('./Routes/URLRoutes')
 const User = require('./Routes/User');
+const Repetitions = require('./Routes/RepetitionsRoutes');
+const PowerStates = require('./Routes/PowerStatesRoutes');
 
 // server  : "infoscreendb.database.windows.net",
 //             username: 'Adamka',
@@ -59,6 +61,8 @@ app.use('/api/settings', PresentationRoutes);
 app.use('/api/collection', URLCollectionRoutes);
 app.use('/api/presentation', URLRoutes);
 app.use('/api/user', User);
+app.use('/api/repetition', Repetitions);
+app.use('/api/powerstates', PowerStates);
 
 //ERROR HANDLING
 app.use((req, res, next) => {

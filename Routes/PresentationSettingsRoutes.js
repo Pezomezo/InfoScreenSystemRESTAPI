@@ -20,20 +20,8 @@ router.get('/',async (req, res, next) => {
 //POST
 router.post('/', async (req, res, err) => {
     try {
-        var newID = null;
         let pool = await poolpromise;
-        //Automatic ID creation
-        //Getting last ID in table
-        const LastID = await pool.request().query('SELECT TOP 1 ID FROM PresentationSettings ORDER BY PresentationID DESC;  ')
-        //Checking wether data came back or not
-        //If mp data came back that mean the table is empty so the new ID will be 1
-        if(LastID.recordset[0]){
-            newID = parseInt(LastID.recordset[0].ID +1)
-        }
-        else{
-            newID = 1
-        }
-        const result = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + newID + "', '" + req.body.Repetition + 
+        const result = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.Repetition + 
                                                     "', '" + req.body.Time_Frame + "', '" + req.body.Date + "');")
         res.status(200).json({
             response: result
@@ -46,24 +34,39 @@ router.post('/', async (req, res, err) => {
 //UPDATE
 router.patch('/:settingsID', async (req, res, err) => {
     try {
+        console.log('inside the patch')
         const settingsID = req.params.settingsID;
-        let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from PresentationSettings WHERE PresentationID = ' + settingsID)
-        if(getResult.recordset[0]){
-            const result = await pool.request().query("UPDATE PresentationSettings SET Repetition ='" + req.body.Repetition + 
-                                                      "', Time_Frame = '" + req.body.Time_Frame +
-                                                      "', Date = '" + req.body.Date + "' WHERE PresentationID ='" + settingsID + "' ;")
-            res.status(200).json({
-            response: result
-            })
-        }else{
-            res.status(404).json({
-                response: "There is no data associated with this ID: " + settingsID
+        console.log(settingsID)
+        console.log(req.body.RepetitionName)
+        const pool = await poolpromise
+        const RepetitionID = await pool.request().query("SELECT ID FROM Repetition WHERE RepetitionName = '" + req.body.RepetitionName + "';");
+        console.log('RepetitionID: ' + RepetitionID);
+        try {
+            const getResult = await pool.request().query('select * from PresentationSettings WHERE PresentationID = ' + settingsID)
+            if(getResult.recordset[0]){
+                const result = await pool.request().query("UPDATE PresentationSettings SET Repetition ='" + RepetitionID.recordset[0].ID + 
+                                                          "', TimeFrame = '" + req.body.Time_Frame +
+                                                          "', StartDate = '" + req.body.Date + "' WHERE PresentationID ='" + settingsID + "' ;")
+                res.status(200).json({
+                    response: result
                 })
+            }else{
+                res.status(404).json({
+                    response: "There is no data associated with this ID: " + settingsID
+                })
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: 'Error while patching presentation',
+                err: error
+            })
         }
-       
     }catch (err) {
         console.log('Error happened: ' + err);
+        res.status(500).json({
+            message: 'Something went wrong updating presentation settings',
+            error: err
+        })
     }
 });
 

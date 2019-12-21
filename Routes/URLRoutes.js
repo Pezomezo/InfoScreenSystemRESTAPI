@@ -3,9 +3,10 @@ const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
 
 
-const sqlJoin = `Select U.UrlID, U.UrlName, U.URL, P.PresentationID, P.Repetition, P.TimeFrame, P.StartDate, M.MagicID, M.Widht, M.Height From URL_Table U
+const sqlJoin = `Select U.UrlID, U.UrlName, U.URL, P.PresentationID, P.Repetition, R.RepetitionName, P.TimeFrame, P.StartDate, M.MagicID, M.Widht, M.Height From URL_Table U
 Join PresentationSettings P ON P.PresentationID = U.PresentationID
-Join MagicSettings M ON M.MagicID = U.MagicID `;
+Join MagicSettings M ON M.MagicID = U.MagicID
+Join Repetition R ON R.ID = P.Repetition `;
 
 //GET
 router.get('/',async (req, res, next) => {
