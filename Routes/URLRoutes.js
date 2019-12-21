@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
 
 
 const sqlJoin = `Select U.UrlID, U.UrlName, U.URL, P.PresentationID, P.Repetition, R.RepetitionName, P.TimeFrame, P.StartDate, M.MagicID, M.Widht, M.Height From URL_Table U
@@ -39,13 +40,11 @@ router.get('/:urlID',async (req, res, next) => {
     }
 });
 
-
-
-
-
 //POST
 router.post('/', async (req, res, err) => {
+    console.log('inside the post route')
          try {
+            console.log(req.body.TimeFrame);           
             const pool = await poolpromise
             const PresentationSave = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.TimeFrame + 
                                                                                                 "', '" + req.body.StartDate +
