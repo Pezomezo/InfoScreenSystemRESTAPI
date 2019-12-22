@@ -44,11 +44,13 @@ router.get('/:urlID',async (req, res, next) => {
 router.post('/', async (req, res, err) => {
     console.log('inside the post route')
          try {
-            console.log(req.body.TimeFrame);           
+            console.log(req.body.TimeFrame + ' ' + req.body.StartDate + ' ' + req.body.Repetition);           
             const pool = await poolpromise
+            const RepetitionID = await pool.request().query("SELECT ID FROM Repetition WHERE RepetitionName = '" + req.body.Repetition + "';");
+            console.log(RepetitionID);
             const PresentationSave = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.TimeFrame + 
                                                                                                 "', '" + req.body.StartDate +
-                                                                                                "', '" + req.body.Repetition + "');");
+                                                                                                "', '" + RepetitionID.recordset[0].ID + "');");
             console.log('settings saved')
             try {
                 const magicSave = await pool.request().query("INSERT INTO MagicSettings VALUES ('" + req.body.MagicWidht +
