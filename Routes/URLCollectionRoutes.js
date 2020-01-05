@@ -1,25 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
 
-
-
-const selectStatement = `SELECT C.CollectionID, G.GroupID, G.GroupName, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState,
-U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition,
+const selectStatement = `SELECT C.CollectionID, G.GroupID, G.GroupName, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState, S.StateName,
+U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition, R.RepetitionName,
 P.TimeFrame, P.StartDate FROM URL_Table U 
-join URLCollections C ON U.UrlID = C.URLID
+Join URLCollections C ON U.UrlID = C.URLID
 Join InfoScreenPC I ON I.InfoScreenPCID = C.InfoScreenID
+Join PowerStates S ON I.PowerState = S.ID
 JOIN Groups G ON G.GroupID = C.GroupID
 Join MagicSettings M ON M.MagicID = U.MagicID
-Join PresentationSettings P ON P.PresentationID = U.PresentationID `
+Join PresentationSettings P ON P.PresentationID = U.PresentationID
+Join Repetition R ON R.ID = P.Repetition `
 
-const individualScreensStatement = `SELECT C.CollectionID, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState,
-U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition,
+const individualScreensStatement = `SELECT C.CollectionID, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState, S.StateName,
+U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition, R.RepetitionName,
 P.TimeFrame, P.StartDate FROM URL_Table U 
 join URLCollections C ON U.UrlID = C.URLID
 Join InfoScreenPC I ON I.InfoScreenPCID = C.InfoScreenID
+Join PowerStates S ON S.ID = I.PowerState
 Join MagicSettings M ON M.MagicID = U.MagicID
-Join PresentationSettings P ON P.PresentationID = U.PresentationID WHERE  C.GroupID IS NULL `
+Join PresentationSettings P ON P.PresentationID = U.PresentationID
+Join Repetition R ON R.ID = P.Repetition WHERE  C.GroupID IS NULL `
 
 //GET all collections and all data associated with them
 router.get('/all',async (req, res, next) => {
@@ -75,23 +78,11 @@ router.get('/:groupID', async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
-        var newID = null;
         let pool = await poolpromise;
-        //Automatic ID creation
-        //Getting last ID in table
-        const LastID = await pool.request().query('SELECT TOP 1 ID FROM URLCollections ORDER BY ID DESC;  ')
-        //Checking wether data came back or not
-        //If mp data came back that mean the table is empty so the new ID will be 1
-        if(LastID.recordset[0]){
-            newID = parseInt(LastID.recordset[0].ID +1)
-        }
-        else{
-            newID = 1
-        }
         try {
-            const result = await pool.request().query("INSERT INTO URLCollections VALUES ('" + newID + "', '" + req.body.Info_Screen_ID + "', '" 
+            const result = await pool.request().query("INSERT INTO URLCollections VALUES ('" + req.body.Info_Screen_ID + "', '" 
                                                                                             + req.body.URL_ID + "', '" + req.body.groupID + "');")
             res.status(200).json({
                 response: result
@@ -108,7 +99,7 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:collectionID', async (req, res, err) => {
+router.patch('/:collectionID', middleware, async (req, res, err) => {
     try {
         const collectionID = req.params.collectionID;
         let pool = await poolpromise;
@@ -135,7 +126,7 @@ router.patch('/:collectionID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:collectionID', async (req, res, err) => {
+router.delete('/:collectionID', middleware, async (req, res, err) => {
     try {
         var collectionID = req.params.collectionID;
     let pool = await poolpromise;
