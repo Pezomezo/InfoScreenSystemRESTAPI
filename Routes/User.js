@@ -54,30 +54,21 @@ router.post('/signup', async (req, res, err) => {
 
 router.post('/login', async (req, res, err) => {
     try {
-        console.log(req.body.username);
-        console.log(req.body.password);
         const pool = await poolpromise;
         userCheck = await pool.request().query("select * from TblUser where Email = '" + req.body.username + "';");
-        console.log(userCheck.recordsets[0][0].Email);
-        console.log(userCheck.recordsets[0][0].UserPassword);
-        console.log(req.body.password)
         if (userCheck.recordsets[0].length !== 0){
             bcrypt.compare(req.body.password, userCheck.recordsets[0][0].UserPassword, (err, result) => {
-                console.log('inside compare');
                 if (err) {
-                    console.log('Error happened')
                     return res.status(401).json({
                     message: 'Auth failed',
                     error: err
                     });
                 } 
                 if (result) {
-                    console.log('creating the token: ' + result);
                     const token = jwt.sign({ 
                         email: userCheck.recordsets[0].Email,
                         userID: userCheck.recordsets[0].UserID
                     }, 'secret', { expiresIn: '1h'} );
-                    console.log('token: ' + token);
                     return res.status(200).json({
                         message: 'Authentication successful',
                         token: token
@@ -94,7 +85,6 @@ router.post('/login', async (req, res, err) => {
             });
         }
     } catch (error) {
-        console.log('Inside catch')
         res.status(500).json({
             message: 'Auth failed'
         });

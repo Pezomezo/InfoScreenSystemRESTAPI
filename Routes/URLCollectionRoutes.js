@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
-
-
+const middleware = require('../middleware/check-auth');
 
 const selectStatement = `SELECT C.CollectionID, G.GroupID, G.GroupName, I.InfoScreenPCID, I.InfoScreenPCName, I.PowerState, S.StateName,
 U.UrlID, U.UrlName, U.URL, M.MagicID, M.Widht, M.Height, P.PresentationID, P.Repetition, R.RepetitionName,
@@ -79,7 +78,7 @@ router.get('/:groupID', async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
         let pool = await poolpromise;
         try {
@@ -100,7 +99,7 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:collectionID', async (req, res, err) => {
+router.patch('/:collectionID', middleware, async (req, res, err) => {
     try {
         const collectionID = req.params.collectionID;
         let pool = await poolpromise;
@@ -127,7 +126,7 @@ router.patch('/:collectionID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:collectionID', async (req, res, err) => {
+router.delete('/:collectionID', middleware, async (req, res, err) => {
     try {
         var collectionID = req.params.collectionID;
     let pool = await poolpromise;

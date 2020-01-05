@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
 
 //GET
 router.get('/',async (req, res, next) => {
@@ -34,7 +35,7 @@ router.get('/:repetitionID',async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
         var newID = null
         let pool = await poolpromise;
@@ -59,7 +60,7 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:repetitionID', async (req, res, err) => {
+router.patch('/:repetitionID', middleware, async (req, res, err) => {
     try {
         const repetitionID = req.params.repetitionID;
         let pool = await poolpromise;
@@ -83,7 +84,7 @@ router.patch('/:repetitionID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:repetitionID', async (req, res, err) => {
+router.delete('/:repetitionID', middleware, async (req, res, err) => {
     try {
         var repetitionID = req.params.repetitionID;
         let pool = await poolpromise;

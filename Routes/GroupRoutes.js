@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
+
 
 //GET
 router.get('/',async (req, res, next) => {
@@ -18,7 +20,7 @@ router.get('/',async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
         let pool = await poolpromise;
         const result = await pool.request().query("INSERT INTO Groups VALUES ('" + req.body.Name + "');")
@@ -31,7 +33,7 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:groupID', async (req, res, err) => {
+router.patch('/:groupID', middleware, async (req, res, err) => {
     try {
         const groupID = req.params.groupID;
         let pool = await poolpromise;
@@ -53,7 +55,7 @@ router.patch('/:groupID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:groupID', async (req, res, err) => {
+router.delete('/:groupID', middleware, async (req, res, err) => {
     try {
         var groupID = req.params.groupID;
         let pool = await poolpromise;

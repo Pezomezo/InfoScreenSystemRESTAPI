@@ -13,10 +13,6 @@ const User = require('./Routes/User');
 const Repetitions = require('./Routes/RepetitionsRoutes');
 const PowerStates = require('./Routes/PowerStatesRoutes');
 
-// server  : "infoscreendb.database.windows.net",
-//             username: 'Adamka',
-//             password: "HorvathAdam98",
-//             options: { encrypt: true, database: "InfoScreenDB" }
 //CORS
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -29,23 +25,6 @@ app.use((req, res, next) => {
     next();
 })
 
-//app.use(function (req, res, next) {
-//    console.log('Inside app db related');
-//    req.sql = tediousExpress({
-//        server: "info-screen-server.database.windows.net",
-//        // If you're on Windows Azure, you will need this:
-//        options: {encrypt: true, database: "infoScrennDB"},
-//        authentication: {
-//          type: "default",
-//          options: {  
-//            userName: "Adamka",
-//            password: "HorvathAdam98",
-//          }
-//        }
-//        });
-//    console.log('Database connected');
-//    next();
-//});
 
 //DEBUGGING
 app.use(morgan('dev'));

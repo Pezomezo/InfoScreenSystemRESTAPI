@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
+
 
 //GET
 router.get('/',async (req, res, next) => {
@@ -34,7 +36,7 @@ router.get('/:magicID',async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
         var newID = null
         let pool = await poolpromise;
@@ -49,14 +51,14 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:magicID', async (req, res, err) => {
+router.patch('/:magicID', middleware, async (req, res, err) => {
     try {
         const magicID = req.params.magicID;
         let pool = await poolpromise;
-        const getResult = await pool.request().query('select * from MagicSettings WHERE ID = ' + magicID)
+        const getResult = await pool.request().query('select * from MagicSettings WHERE MagicID = ' + magicID)
         if (getResult.recordset[0]) {
-            const result = await pool.request().query("UPDATE MagicSettings SET MagicWidth ='" + req.body.width + 
-                                                     "', MagicHeigth = '" + req.body.heigth +
+            const result = await pool.request().query("UPDATE MagicSettings SET Widht ='" + req.body.width + 
+                                                     "', Height = '" + req.body.heigth +
                                                       "' WHERE MagicID ='" + magicID + "' ;")
             res.status(200).json({
                 response: result
@@ -75,7 +77,7 @@ router.patch('/:magicID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:magicID', async (req, res, err) => {
+router.delete('/:magicID', middleware, async (req, res, err) => {
     try {
         var magicID = req.params.magicID;
         let pool = await poolpromise;

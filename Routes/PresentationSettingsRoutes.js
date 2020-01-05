@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { poolpromise } = require('../Database/DatabaseSingleton')
+const middleware = require('../middleware/check-auth');
 
 //GET
 router.get('/',async (req, res, next) => {
@@ -18,11 +19,12 @@ router.get('/',async (req, res, next) => {
 });
 
 //POST
-router.post('/', async (req, res, err) => {
+router.post('/', middleware, async (req, res, err) => {
     try {
         let pool = await poolpromise;
-        const result = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.Repetition + 
-                                                    "', '" + req.body.Time_Frame + "', '" + req.body.Date + "');")
+        const result = await pool.request().query("INSERT INTO PresentationSettings VALUES ('" + req.body.Time_Frame + "', '"
+         + req.body.Date + "', '" + req.body.Repetition + 
+         "');")
         res.status(200).json({
             response: result
         })
@@ -32,7 +34,7 @@ router.post('/', async (req, res, err) => {
 });
 
 //UPDATE
-router.patch('/:settingsID', async (req, res, err) => {
+router.patch('/:settingsID', middleware, async (req, res, err) => {
     try {
         console.log('inside the patch')
         const settingsID = req.params.settingsID;
@@ -71,7 +73,7 @@ router.patch('/:settingsID', async (req, res, err) => {
 });
 
 //DELETE
-router.delete('/:settingsID', async (req, res, err) => {
+router.delete('/:settingsID', middleware, async (req, res, err) => {
     try {
         var settingsID = req.params.settingsID;
         let pool = await poolpromise;
